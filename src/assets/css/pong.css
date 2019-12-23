@@ -23,13 +23,13 @@ body {
     cursor: default;
 }
 
-#pong #pong-playground.playState {
-    cursor: none;
+#pong #pong-playground.playState #racket {
+    background: #f00;
 }
 
 #pong #pong-playground #racket {
-    width: 300px;
-    height: 50px;
+    width: 200px;
+    height: 25px;
     background: #fff;
     border-radius: 40px;
 }
@@ -42,10 +42,7 @@ body {
 }
 
 #pong #pong-playground .brick {
-    width: 200px;
     height: 50px;
     background: #fff;
-    border: 1px solid #f00;
-    display: inline-block;
-    margin: 20px 50px;
+    position: absolute;
 }
