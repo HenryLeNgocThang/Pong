@@ -43,6 +43,13 @@ body {
     position: absolute;
 }
 
+#pong #pong-playground #score {
+    position: absolute;
+    color: #fff;
+    bottom: 0;
+    left: 25px;
+}
+
 #pong #pong-playground #ball,
 #pong #pong-playground .brick {
     display: none;

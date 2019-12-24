@@ -38,6 +38,11 @@ document.addEventListener("DOMContentLoaded", function () {
             }
         },
         bricks = [],
+        score = {
+            el: document.querySelector("#score"),
+            points: 0,
+            increase: 0
+        },
         particle = [];
 
     playground.el.addEventListener("click", function () {
@@ -108,7 +113,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
             // GAME OVER when ball gets out of playground
             if (ball.y > playground.h + ball.h) {
-                alert("GAME OVER!");
+                alert("GAME OVER! Score: " + score.points);
                 status.playState = false;
                 window.location.reload();
             } else if (ball.y < 0 - ball.h / 2) { // Reflect ball then it hits the top
@@ -119,19 +124,33 @@ document.addEventListener("DOMContentLoaded", function () {
 
             // Remove Brick if ball collides
             if (document.querySelectorAll(".brick").length == 0) {
-                alert("YOU WON!");
+                alert("YOU WON! Score: " + score.points);
                 status.playState = false;
                 window.location.reload();
             } else {
                 for (i = 0; i < document.querySelectorAll(".brick").length; i++) {
                     var gameBricks = document.querySelectorAll(".brick");
 
+                    // Run logic if ball hits a brick
                     if (ball.el.getBoundingClientRect().top < gameBricks[i].getBoundingClientRect().top + gameBricks[i].getBoundingClientRect().height &&
                         ball.el.getBoundingClientRect().top + ball.el.getBoundingClientRect().height > gameBricks[i].getBoundingClientRect().top &&
                         ball.el.getBoundingClientRect().left < gameBricks[i].getBoundingClientRect().left + gameBricks[i].getBoundingClientRect().width &&
                         ball.el.getBoundingClientRect().left + ball.el.getBoundingClientRect().width > gameBricks[i].getBoundingClientRect().left) {
                         ball.ballSpeedY *= -1;
                         ball.ballSpeedY += ball.speedIncrease;
+
+                        // Increase score by the ballspeed
+                        score.increase += Math.round(ball.ballSpeedY * Math.abs(ball.ballSpeedX));
+                        var interval = setInterval(function () {
+                            score.points++;
+                            console.log(score.points);
+                            score.el.innerHTML = "<h2>Score: " + score.points + "</h2>";
+
+                            if (score.points >= score.increase) {
+                                clearInterval(interval);
+                            }
+                        });
+
                         gameBricks[i].remove();
                     }
                 }
@@ -143,7 +162,7 @@ document.addEventListener("DOMContentLoaded", function () {
         for (i = 0; i < column; i++) {
             for (j = 0; j < row; j++) {
                 var xPos;
-                var yPos = j * 75;
+                var yPos = j * (margin * 2.5);
 
                 bricks[j] = document.createElement("div");
                 playground.el.appendChild(bricks[j]);
@@ -160,4 +179,5 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     drawBricks(getRandomNumber(4, 8), getRandomNumber(2, 3), 30);
+    score.el.innerHTML = "<h2>Score: " + score.points + "</h2>";
 });
