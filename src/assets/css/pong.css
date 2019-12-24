@@ -23,10 +23,6 @@ body {
     cursor: default;
 }
 
-#pong #pong-playground.playState #racket {
-    background: #f00;
-}
-
 #pong #pong-playground #racket {
     width: 200px;
     height: 25px;
@@ -45,4 +41,27 @@ body {
     height: 50px;
     background: #fff;
     position: absolute;
+}
+
+#pong #pong-playground #ball,
+#pong #pong-playground .brick {
+    display: none;
+    visibility: hidden;
+    opacity: 0;
+}
+
+#pong #pong-playground.playState #ball,
+#pong #pong-playground.playState .brick {
+    display: block;
+    visibility: visible;
+    opacity: 1;
+}
+
+#pong #pong-playground.pauseState #racket,
+#pong #pong-playground.pauseState #ball,
+#pong #pong-playground.pauseState .brick {
+    display: block;
+    visibility: visible;
+    opacity: 1;
+    background: #f00;
 }

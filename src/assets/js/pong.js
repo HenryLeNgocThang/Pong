@@ -1,61 +1,69 @@
 document.addEventListener("DOMContentLoaded", function () {
 
     var mouseX = window.innerWidth / 2,
-        mouseY = window.innerHeight / 2
-    playState = false
-    playground = {
-        el: document.querySelector("#pong-playground"),
-        w: document.querySelector("#pong-playground").offsetWidth,
-        h: document.querySelector("#pong-playground").offsetHeight
-    }
-    racket = {
-        el: document.querySelector("#racket"),
-        x: window.innerWidth / 2,
-        y: window.innerHeight - 125,
-        w: document.querySelector("#racket").offsetWidth,
-        h: document.querySelector("#racket").offsetHeight,
-        update: function () {
-            l = this.x - this.w / 2;
-            t = this.y;
-            this.el.style.transform = 'translate3d(' + l + 'px, ' + t + 'px, 0)';
-        }
-    }
-    ball = {
-        el: document.querySelector("#ball"),
-        x: window.innerWidth / 2,
-        y: window.innerHeight / 2,
-        w: 25,
-        h: 25,
-        ballSpeedY: 10,
-        ballSpeedX: 10,
-        update: function () {
-            l = this.x - this.w / 2;
-            t = this.y - this.h / 2;
-            this.el.style.transform = 'translate3d(' + l + 'px, ' + t + 'px, 0)';
-        }
-    }
-    bricks = [];
+        status = {
+            playState: false,
+            pauseState: false
+        },
+        playground = {
+            el: document.querySelector("#pong-playground"),
+            w: document.querySelector("#pong-playground").offsetWidth,
+            h: document.querySelector("#pong-playground").offsetHeight,
+        },
+        racket = {
+            el: document.querySelector("#racket"),
+            x: playground.w / 2,
+            y: playground.h / 2 * 1.7,
+            w: document.querySelector("#racket").offsetWidth,
+            h: document.querySelector("#racket").offsetHeight,
+            update: function () {
+                l = this.x - this.w / 2;
+                t = this.y;
+                this.el.style.transform = 'translate(' + l + 'px, ' + t + 'px)';
+            }
+        },
+        ball = {
+            el: document.querySelector("#ball"),
+            x: window.innerWidth / 2,
+            y: window.innerHeight / 2,
+            w: 25,
+            h: 25,
+            ballSpeedY: 10,
+            ballSpeedX: 10,
+            speedIncrease: 2,
+            update: function () {
+                l = this.x - this.w / 2;
+                t = this.y - this.h / 2;
+                this.el.style.transform = 'translate(' + l + 'px, ' + t + 'px)';
+            }
+        },
+        bricks = [],
+        particle = [];
 
     playground.el.addEventListener("click", function () {
-        if (!playState) {
-            playState = true;
+        if (!status.playState || status.pauseState) {
+            status.playState = true;
+            status.pauseState = false;
             playground.el.classList.add("playState");
+            playground.el.classList.remove("pauseState");
         }
     });
 
     document.addEventListener("keydown", function (e) {
-        if (playState) {
+        if (status.playState) {
             var e = window.event;
 
             if (e.keyCode == 27) {
-                playState = false;
+                status.playState = false;
+                status.pauseState = true;
+                playground.el.classList.add("pauseState");
                 playground.el.classList.remove("playState");
             }
         }
     });
 
     playground.el.addEventListener("mousemove", function (e) {
-        if (playState) {
+        if (status.playState && !status.pauseState) {
             mouseX = e.clientX;
             mouseY = e.clientY;
         }
@@ -71,36 +79,39 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     function ballMovement() {
-        if (playState) {
+        if (status.playState && !status.pauseState) {
+            // Moving ball
             ball.x += ball.ballSpeedX * 0.1;
             ball.y += ball.ballSpeedY * 0.1;
 
-            // Collide with racket
-            if (ball.y > racket.y - racket.h && isCollapsed(ball.el, racket.el)) {
+            // Collide with racket. Reflect when in same height as racket && position + racket.width
+            if (ball.y + racket.h + ball.h / 2 > racket.y && ball.y + ball.h / 2 < racket.y &&
+                ball.el.getBoundingClientRect().left < racket.el.getBoundingClientRect().left + racket.el.getBoundingClientRect().width &&
+                ball.el.getBoundingClientRect().left + ball.el.getBoundingClientRect().width > racket.el.getBoundingClientRect().left
+            ) {
                 ball.ballSpeedY *= -1;
-            } else if (ball.y < racket.y) {
-                ball.ballSpeedY *= +1;
+
+                // Collide with racket increase speed depends on position with corners
+                if (ball.ballSpeedX >= 0) {
+                    ball.ballSpeedX = (ball.el.getBoundingClientRect().left - racket.el.getBoundingClientRect().left) / (bricks.length * 2);
+                } else if (ball.ballSpeedX <= 0) {
+                    ball.ballSpeedX = (racket.el.getBoundingClientRect().right - ball.el.getBoundingClientRect().right) / (bricks.length * 2) * -1;
+                }
             }
 
-            // Collide with racket increase speed depends on position with corners
-            if (isCollapsed(racket.el, ball.el) && ball.ballSpeedX >= 0) {
-                ball.ballSpeedX = (ball.el.getBoundingClientRect().left - racket.el.getBoundingClientRect().left) / 10;
-            } else if (isCollapsed(racket.el, ball.el) && ball.ballSpeedX <= 0) {
-                ball.ballSpeedX = (racket.el.getBoundingClientRect().right - ball.el.getBoundingClientRect().right) / 10 * -1;
-            }
-
-            // Collide with borders
-            if (ball.x > playground.w) {
+            // Collide with gameborder left and right
+            if (ball.x + ball.w / 2 > playground.w) {
                 ball.ballSpeedX *= -1;
-            } else if (ball.x < 0) {
+            } else if (ball.x < 0 + ball.w / 2) {
                 ball.ballSpeedX *= -1;
             }
 
+            // GAME OVER when ball gets out of playground
             if (ball.y > playground.h + ball.h) {
                 alert("GAME OVER!");
-                playState = false;
+                status.playState = false;
                 window.location.reload();
-            } else if (ball.y < 0 - ball.h) {
+            } else if (ball.y < 0 - ball.h / 2) { // Reflect ball then it hits the top
                 ball.ballSpeedY *= -1;
             }
 
@@ -109,33 +120,22 @@ document.addEventListener("DOMContentLoaded", function () {
             // Remove Brick if ball collides
             if (document.querySelectorAll(".brick").length == 0) {
                 alert("YOU WON!");
-                playState = false;
+                status.playState = false;
                 window.location.reload();
             } else {
                 for (i = 0; i < document.querySelectorAll(".brick").length; i++) {
-                    if (isCollapsed(document.querySelectorAll(".brick")[i], ball.el)) {
-                        document.querySelectorAll(".brick")[i].remove();
+                    var gameBricks = document.querySelectorAll(".brick");
+
+                    if (ball.el.getBoundingClientRect().top < gameBricks[i].getBoundingClientRect().top + gameBricks[i].getBoundingClientRect().height &&
+                        ball.el.getBoundingClientRect().top + ball.el.getBoundingClientRect().height > gameBricks[i].getBoundingClientRect().top &&
+                        ball.el.getBoundingClientRect().left < gameBricks[i].getBoundingClientRect().left + gameBricks[i].getBoundingClientRect().width &&
+                        ball.el.getBoundingClientRect().left + ball.el.getBoundingClientRect().width > gameBricks[i].getBoundingClientRect().left) {
                         ball.ballSpeedY *= -1;
-                        ball.ballSpeedY += 3;
+                        ball.ballSpeedY += ball.speedIncrease;
+                        gameBricks[i].remove();
                     }
                 }
             }
-        }
-    }
-
-    function isCollapsed(elem1, elem2) {
-        var object1 = elem1.getBoundingClientRect();
-        var object2 = elem2.getBoundingClientRect();
-
-        if (
-            object1.left < object2.left + object2.width &&
-            object1.left + object1.width > object2.left &&
-            object1.top < object2.top + object2.height &&
-            object1.top + object1.height > object2.top
-        ) {
-            return true;
-        } else {
-            return false;
         }
     }
 
@@ -155,5 +155,9 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     }
 
-    drawBricks(8, 3, 50);
+    function getRandomNumber(min, max) {
+        return Math.round(Math.random() * (max - min) + min);
+    }
+
+    drawBricks(getRandomNumber(4, 8), getRandomNumber(2, 3), 30);
 });
