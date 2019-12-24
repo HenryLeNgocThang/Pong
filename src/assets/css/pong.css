@@ -50,6 +50,15 @@ body {
     left: 25px;
 }
 
+#pong #pong-playground #score h2 p {
+    display: inline-block;
+    margin: 0;
+}
+
+#pong #pong-playground #score h2 p::first-letter {
+    font-size: 30px;
+}
+
 #pong #pong-playground #ball,
 #pong #pong-playground .brick {
     display: none;

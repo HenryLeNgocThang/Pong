@@ -143,8 +143,7 @@ document.addEventListener("DOMContentLoaded", function () {
                         score.increase += Math.round(ball.ballSpeedY * Math.abs(ball.ballSpeedX));
                         var interval = setInterval(function () {
                             score.points++;
-                            console.log(score.points);
-                            score.el.innerHTML = "<h2>Score: " + score.points + "</h2>";
+                            score.el.innerHTML = "<h2>Score: <p>" + score.points + "</p></h2>";
 
                             if (score.points >= score.increase) {
                                 clearInterval(interval);
@@ -179,5 +178,5 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     drawBricks(getRandomNumber(4, 8), getRandomNumber(2, 3), 30);
-    score.el.innerHTML = "<h2>Score: " + score.points + "</h2>";
+    score.el.innerHTML = "<h2>Score: <p>" + score.points + "</p></h2>";
 });
