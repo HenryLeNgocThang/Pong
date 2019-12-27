@@ -24,6 +24,7 @@ body {
     margin: auto;
     overflow: hidden;
     cursor: default;
+
 }
 
 #pong #pong-playground #racket {
@@ -41,9 +42,11 @@ body {
 #pong #pong-playground.startState #racket .arrow:before {
     content: "\f176";
     font-family: FontAwesome;
+    font-size: 30px;
+    font-weight: bolder;
     position: absolute;
     left: 50%;
-    transform: translate(-50%, -300%);
+    transform: translate(-50%, -220%);
 }
 
 #pong #pong-playground #ball {
@@ -57,6 +60,16 @@ body {
     height: 50px;
     background: #fff;
     position: absolute;
+}
+
+@keyframes fadeIn {
+    0% {
+        opacity: 0;
+    }
+
+    100% {
+        opacity: 1;
+    }
 }
 
 #pong #pong-playground #score {
@@ -81,6 +94,7 @@ body {
     display: none;
     visibility: hidden;
     opacity: 0;
+    animation: fadeIn .3s ease-in;
 }
 
 #pong #pong-playground.playState #ball,

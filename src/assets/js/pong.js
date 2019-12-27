@@ -17,6 +17,7 @@ document.addEventListener("DOMContentLoaded", function () {
             y: playground.h / 2 * 1.7,
             w: document.querySelector("#racket").offsetWidth,
             h: document.querySelector("#racket").offsetHeight,
+            smooth: 1, // 10 Is no lerp, recommanded is 1
             update: function () {
                 l = this.x - this.w / 2;
                 t = this.y;
@@ -81,22 +82,20 @@ document.addEventListener("DOMContentLoaded", function () {
 
     playground.el.addEventListener("mousemove", function (e) {
         if (status.startState && !status.playState && !status.pauseState) {
-            mouseX = e.clientX;
-            mouseY = e.clientY;
+            mouseX = e.pageX - playground.el.getBoundingClientRect().left;
 
             racket.arr.style.transform = "rotate(" + ((mouseX * 100 / playground.w) - 50) * 1.5 + "deg)";
         } else if (!status.startState && status.playState && !status.pauseState) {
-            mouseX = e.clientX;
-            mouseY = e.clientY;
+            mouseX = e.pageX - playground.el.getBoundingClientRect().left;
         }
     });
 
-    // Smooth animation
     setInterval(racketMovement, 1000 / 60);
     setInterval(ballMovement, 1);
 
     function racketMovement() {
-        racket.x += (mouseX - racket.x) * 0.1;
+        // Increase Racket x pos to mouseX pos smooth
+        racket.x += (mouseX - racket.x) * (racket.smooth / 10);
         racket.update();
 
         // Set ballX direction depends on racketX position and startState
