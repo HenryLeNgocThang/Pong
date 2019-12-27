@@ -1,3 +1,6 @@
+/* Font Awesome 4.7 läuft über die Creative Commones Lizensen und ist für private als auch kommmenzielle Zwecke, auch ohne Angabe, frei zu nutzen. */
+@import url("imports/font-awesome.css");
+
 * {
     box-sizing: border-box;
 }
@@ -30,6 +33,19 @@ body {
     border-radius: 40px;
 }
 
+#pong #pong-playground #racket .arrow {
+    position: relative;
+    color: #fff;
+}
+
+#pong #pong-playground.startState #racket .arrow:before {
+    content: "\f176";
+    font-family: FontAwesome;
+    position: absolute;
+    left: 50%;
+    transform: translate(-50%, -300%);
+}
+
 #pong #pong-playground #ball {
     width: 25px;
     height: 25px;
@@ -60,6 +76,7 @@ body {
 }
 
 #pong #pong-playground #ball,
+#pong #pong-playground #score,
 #pong #pong-playground .brick {
     display: none;
     visibility: hidden;
@@ -67,7 +84,11 @@ body {
 }
 
 #pong #pong-playground.playState #ball,
-#pong #pong-playground.playState .brick {
+#pong #pong-playground.playState #score,
+#pong #pong-playground.playState .brick,
+#pong #pong-playground.startState #ball,
+#pong #pong-playground.startState #score,
+#pong #pong-playground.startState .brick {
     display: block;
     visibility: visible;
     opacity: 1;
@@ -80,4 +101,11 @@ body {
     visibility: visible;
     opacity: 1;
     background: #f00;
+}
+
+#pong #pong-playground.pauseState #score {
+    display: block;
+    visibility: visible;
+    opacity: 1;
+    color: #f00;
 }

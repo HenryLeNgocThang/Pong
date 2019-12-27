@@ -1,7 +1,7 @@
 document.addEventListener("DOMContentLoaded", function () {
-
     var mouseX = window.innerWidth / 2,
         status = {
+            startState: false,
             playState: false,
             pauseState: false
         },
@@ -12,6 +12,7 @@ document.addEventListener("DOMContentLoaded", function () {
         },
         racket = {
             el: document.querySelector("#racket"),
+            arr: document.querySelector(".arrow"),
             x: playground.w / 2,
             y: playground.h / 2 * 1.7,
             w: document.querySelector("#racket").offsetWidth,
@@ -45,8 +46,18 @@ document.addEventListener("DOMContentLoaded", function () {
         },
         particle = [];
 
+    // Change States when clicking on playground
     playground.el.addEventListener("click", function () {
-        if (!status.playState || status.pauseState) {
+        if (!status.playState && !status.pauseState && !status.startState) { // Start
+            status.startState = true;
+            playground.el.classList.add("startState");
+        } else if (!status.playState && !status.pauseState && status.startState) { // Play
+            status.playState = true;
+            status.startState = false;
+            playground.el.classList.add("playState");
+            playground.el.classList.remove("startState");
+            racket.el.classList.remove("arrow");
+        } else if (!status.playState && status.pauseState && !status.startState) { // Continue play
             status.playState = true;
             status.pauseState = false;
             playground.el.classList.add("playState");
@@ -54,10 +65,11 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     });
 
+    // Continue play if press escape
     document.addEventListener("keydown", function (e) {
-        if (status.playState) {
-            var e = window.event;
+        var e = window.event;
 
+        if (status.playState) {
             if (e.keyCode == 27) {
                 status.playState = false;
                 status.pauseState = true;
@@ -68,7 +80,12 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 
     playground.el.addEventListener("mousemove", function (e) {
-        if (status.playState && !status.pauseState) {
+        if (status.startState && !status.playState && !status.pauseState) {
+            mouseX = e.clientX;
+            mouseY = e.clientY;
+
+            racket.arr.style.transform = "rotate(" + ((mouseX * 100 / playground.w) - 50) * 1.5 + "deg)";
+        } else if (!status.startState && status.playState && !status.pauseState) {
             mouseX = e.clientX;
             mouseY = e.clientY;
         }
@@ -81,10 +98,18 @@ document.addEventListener("DOMContentLoaded", function () {
     function racketMovement() {
         racket.x += (mouseX - racket.x) * 0.1;
         racket.update();
+
+        // Set ballX direction depends on racketX position and startState
+        if (status.startState && !status.playState && !status.pauseState) {
+            ball.x = racket.x;
+            ball.y = racket.y - racket.h - ball.h / 2;
+            ball.ballSpeedX = (mouseX - playground.w / 2) / 20;
+            ball.update();
+        }
     }
 
     function ballMovement() {
-        if (status.playState && !status.pauseState) {
+        if (status.playState && !status.pauseState && !status.startState) {
             // Moving ball
             ball.x += ball.ballSpeedX * 0.1;
             ball.y += ball.ballSpeedY * 0.1;
@@ -137,7 +162,13 @@ document.addEventListener("DOMContentLoaded", function () {
                         ball.el.getBoundingClientRect().left < gameBricks[i].getBoundingClientRect().left + gameBricks[i].getBoundingClientRect().width &&
                         ball.el.getBoundingClientRect().left + ball.el.getBoundingClientRect().width > gameBricks[i].getBoundingClientRect().left) {
                         ball.ballSpeedY *= -1;
-                        ball.ballSpeedY += ball.speedIncrease;
+
+                        // Increase ballspeed
+                        if (ball.ballSpeedY < 0) {
+                            ball.ballSpeedY -= ball.speedIncrease;
+                        } else if (ball.ballSpeedY > 0) {
+                            ball.ballSpeedY += ball.speedIncrease;
+                        }
 
                         // Increase score by the ballspeed
                         score.increase += Math.round(ball.ballSpeedY * Math.abs(ball.ballSpeedX));
@@ -176,6 +207,9 @@ document.addEventListener("DOMContentLoaded", function () {
     function getRandomNumber(min, max) {
         return Math.round(Math.random() * (max - min) + min);
     }
+
+    // Revert ball direction from bottom to top
+    ball.ballSpeedY *= -1;
 
     drawBricks(getRandomNumber(4, 8), getRandomNumber(2, 3), 30);
     score.el.innerHTML = "<h2>Score: <p>" + score.points + "</p></h2>";
